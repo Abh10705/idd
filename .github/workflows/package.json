@@ -1,0 +1,12 @@
+{
+  "name": "matrix-build-demo",
+  "version": "1.0.0",
+  "description": "GitHub Actions Matrix Build Demo",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Test passed\""
+  },
+  "keywords": ["github-actions", "matrix-build", "ci-cd"],
+  "author": "Your Name",
+  "license": "MIT"
+}
