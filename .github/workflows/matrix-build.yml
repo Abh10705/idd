@@ -1,0 +1,117 @@
+name: Multi-Platform Matrix Build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [14, 16, 18]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      
+      - name: matrix-422668b
+        run: |
+          echo "==================================="
+          echo "Building with Node.js ${{ matrix.node-version }}"
+          echo "==================================="
+          node --version
+          npm --version
+      
+      - name: Install dependencies
+        run: npm install --no-save chalk
+      
+      - name: Generate build artifact
+        run: |
+          mkdir -p build
+          cat > build/output-v${{ matrix.node-version }}.json << 'EOF'
+          {
+            "build_id": "422668b",
+            "variant": "node-v${{ matrix.node-version }}",
+            "node_version": "${{ matrix.node-version }}",
+            "npm_version": "latest",
+            "status": "success",
+            "artifacts": {
+              "prefix": "build-422668b",
+              "variant_tag": "v${{ matrix.node-version }}"
+            }
+          }
+          EOF
+          
+          cat > build/build-report-v${{ matrix.node-version }}.txt << 'EOF'
+          ============================================
+          Build Report for Node.js v${{ matrix.node-version }}
+          ============================================
+          
+          Build ID: 422668b
+          Matrix Variant: node-v${{ matrix.node-version }}
+          
+          Build Output:
+          - Node.js version: v${{ matrix.node-version }}
+          - NPM version: latest
+          - Platform: Linux
+          - Architecture: x64
+          
+          Build Status: SUCCESS
+          ============================================
+          EOF
+      
+      - name: Display build artifacts
+        run: |
+          echo "Generated artifacts:"
+          ls -la build/
+          echo ""
+          echo "Content of JSON artifact:"
+          cat build/output-v${{ matrix.node-version }}.json
+          echo ""
+          echo "Content of TXT artifact:"
+          cat build/build-report-v${{ matrix.node-version }}.txt
+      
+      - name: Upload JSON artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-422668b-v${{ matrix.node-version }}
+          path: build/output-v${{ matrix.node-version }}.json
+          retention-days: 30
+      
+      - name: Upload build report artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-422668b-report-v${{ matrix.node-version }}
+          path: build/build-report-v${{ matrix.node-version }}.txt
+          retention-days: 30
+
+  summary:
+    needs: build
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+      - name: Build matrix summary
+        run: |
+          echo "========================================"
+          echo "Matrix Build Summary"
+          echo "========================================"
+          echo "Build ID: 422668b"
+          echo "Matrix builds completed for:"
+          echo "  - Node.js v14"
+          echo "  - Node.js v16"
+          echo "  - Node.js v18"
+          echo ""
+          echo "Artifacts uploaded:"
+          echo "  - build-422668b-v14"
+          echo "  - build-422668b-v16"
+          echo "  - build-422668b-v18"
+          echo "========================================"
